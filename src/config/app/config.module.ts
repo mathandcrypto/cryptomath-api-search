@@ -9,6 +9,8 @@ import { AppConfigService } from './config.service';
     ConfigModule.forRoot({
       load: [configuration],
       validationSchema: Joi.object({
+        APP_PROTO_FILE: Joi.string().required(),
+        APP_PROTO_URL: Joi.string().required(),
         APP_RABBITMQ_USER: Joi.string().required(),
         APP_RABBITMQ_PASSWORD: Joi.string().required(),
         APP_RABBITMQ_HOST: Joi.string().required(),

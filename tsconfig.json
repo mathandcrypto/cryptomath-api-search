@@ -12,8 +12,12 @@
     "baseUrl": "./src",
     "incremental": true,
     "paths": {
+      "@common/*": ["common/*"],
       "@config/*": ["config/*"],
-      "@search/*": ["search/*"]
+      "@providers/*": ["providers/*"],
+      "@articles/*": ["articles/*"],
+      "@hubs/*": ["hubs/*"],
+      "@tags/*": ["tags/*"]
     }
   }
 }
