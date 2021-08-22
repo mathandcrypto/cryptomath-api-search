@@ -10,8 +10,8 @@ import { ElasticsearchConfigService } from './config.service';
       load: [configuration],
       validationSchema: Joi.object({
         ELASTICSEARCH_NODE: Joi.string().required(),
-        ELASTICSEARCH_AUTH_USERNAME: Joi.string().required(),
-        ELASTICSEARCH_AUTH_PASSWORD: Joi.string().required(),
+        ELASTICSEARCH_USERNAME: Joi.string().required(),
+        ELASTICSEARCH_PASSWORD: Joi.string().required(),
         ELASTICSEARCH_MAX_RETRIES: Joi.number().default(3),
         ELASTICSEARCH_REQUEST_TIMEOUT: Joi.number().default(10000),
         ELASTICSEARCH_PING_TIMEOUT: Joi.number().default(3000),

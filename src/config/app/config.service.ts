@@ -5,6 +5,14 @@ import { ConfigService } from '@nestjs/config';
 export class AppConfigService {
   constructor(private configService: ConfigService) {}
 
+  get protoFile(): string {
+    return this.configService.get<string>('app.protoFile');
+  }
+
+  get protoUrl(): string {
+    return this.configService.get<string>('app.protoUrl');
+  }
+
   get rmqUser(): string {
     return this.configService.get<string>('app.rmqUser');
   }

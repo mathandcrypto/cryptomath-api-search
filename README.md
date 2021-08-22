@@ -1,4 +1,4 @@
-#cryptomath-api-search
+# cryptomath-api-search
 **Search** microservice for search and delivery of found results.
 
 ## Installation
