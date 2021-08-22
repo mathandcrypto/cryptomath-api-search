@@ -35,3 +35,5 @@ lerna-debug.log*
 
 # Local
 .env
+rabbitmq.conf
+elasticsearch.yml

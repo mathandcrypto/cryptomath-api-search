@@ -1,8 +1,11 @@
-import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
+import {
+  QueryDslQueryContainer,
+  SearchSort,
+} from '@elastic/elasticsearch/api/types';
 
 export interface SearchBaseRequestBody {
-  query?: QueryContainer;
-  sort?: Sort;
+  query?: QueryDslQueryContainer;
+  sort?: SearchSort;
   from: number;
   size: number;
 }

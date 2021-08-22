@@ -1,0 +1,65 @@
+version: '3.9'
+services:
+  dev:
+    container_name: cryptomath-api-search-dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: npm run start:dev
+    ports:
+      - '5005:5005'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - elastic
+  prod:
+    container_name: cryptomath-api-search-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - '5005:5005'
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - elastic
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: cryptomath-api-search-rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - /var/lib/rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: cryptomath-search-elastic
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - node.name=cryptomath-elasticsearch-node
+      - cluster.name=cryptomath-elasticsearch-cluster
+      - bootstrap.memory_lock=true
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+volumes:
+  elastic:
+    driver: local
+networks:
+  elastic:
+    driver: bridge

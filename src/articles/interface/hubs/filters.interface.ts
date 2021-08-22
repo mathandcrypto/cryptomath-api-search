@@ -1,7 +1,14 @@
-import { TermQuery, RangeQuery } from '@elastic/elasticsearch/api/types';
+import {
+  QueryDslTermQuery,
+  QueryDslRangeQuery,
+} from '@elastic/elasticsearch/api/types';
 import { TermTypeQuery } from '@common/interfaces/elastic/query/term-type-query.interface';
 
 export interface HubsFilters {
-  articles_count: TermTypeQuery<TermQuery> | TermTypeQuery<RangeQuery>;
-  tags_count: TermTypeQuery<TermQuery> | TermTypeQuery<RangeQuery>;
+  articles_count:
+    | TermTypeQuery<QueryDslTermQuery>
+    | TermTypeQuery<QueryDslRangeQuery>;
+  tags_count:
+    | TermTypeQuery<QueryDslTermQuery>
+    | TermTypeQuery<QueryDslRangeQuery>;
 }

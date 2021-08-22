@@ -4,12 +4,14 @@ import { ArticlesConfigService } from '@config/articles/config.service';
 import {
   HubsFilters as HubsFiltersProto,
   HubsSorts as HubsSortsProto,
-} from 'cryptomath-api-proto/types/search';
-import { IndexHubDocument } from './interface/hubs/index-document.interface';
+} from '@cryptomath/cryptomath-api-proto/types/search';
 import { HubsSorts } from './interface/hubs/sorts.interface';
 import { HubsFilters } from './interface/hubs/filters.interface';
 import { HubSource } from './interface/hubs/source.interface';
 import { SearchBaseRequestBody } from '@common/interfaces/elastic/search/base-request-body.interface';
+import { ParentRelation } from '@common/interfaces/elastic/index/parent-relation.interface';
+import { UpdateDocumentRequestBody } from '@common/interfaces/elastic/document/update-request-body.interface';
+import { SearchHit } from '@elastic/elasticsearch/api/types';
 import { getSortOrder } from '@common/helpers/sorts';
 import { getRangeQueryObject } from '@common/helpers/filters';
 import { prepareSearchRequestBody } from '@common/helpers/elastic';
@@ -83,7 +85,7 @@ export class HubsService implements OnModuleInit {
     sorts: HubsSortsProto,
     offset: number,
     limit: number,
-  ): Promise<[boolean, number, number, number[]]> {
+  ): Promise<[boolean, number, number, number, Array<SearchHit<HubSource>>]> {
     const sortObject = this.getSortObject(sorts);
     const filterObject = this.getFilterObject(filters);
     const size = Math.min(
@@ -97,6 +99,7 @@ export class HubsService implements OnModuleInit {
       sortObject,
       offset,
       size,
+      'hub',
     );
 
     const [isDocumentsFound, totalDocuments, searchResponse] =
@@ -106,18 +109,13 @@ export class HubsService implements OnModuleInit {
       );
 
     if (!isDocumentsFound) {
-      return [false, 0, 0, []];
+      return [false, 0, 0, 0, []];
     }
 
-    const { hits } = searchResponse;
+    const { hits, took } = searchResponse;
     const { hits: hubsDocuments } = hits;
 
-    return [
-      true,
-      size,
-      totalDocuments,
-      hubsDocuments.map((doc) => doc._source.hub_id),
-    ];
+    return [true, took, size, totalDocuments, hubsDocuments];
   }
 
   async insertDocument(
@@ -126,12 +124,17 @@ export class HubsService implements OnModuleInit {
     description: string,
   ): Promise<[boolean, string]> {
     const [isDocumentIndexed, indexedDocument] =
-      await this.elasticService.indexDocument<IndexHubDocument>(
+      await this.elasticService.indexDocument<HubSource & ParentRelation>(
         this.articlesConfigService.hubsElasticsearchIndex,
         {
           hub_id: id,
           name,
           description,
+          articles_count: 0,
+          tags_count: 0,
+          relation_type: {
+            name: 'hub',
+          },
         },
       );
 
@@ -147,6 +150,36 @@ export class HubsService implements OnModuleInit {
     }
 
     return [false, ''];
+  }
+
+  async updateDocument(
+    documentId: string,
+    updateData: Partial<HubSource>,
+  ): Promise<[boolean, number]> {
+    const updateRequestBody = {
+      doc: updateData,
+    };
+    const [isDocumentUpdated, updateResult] =
+      await this.elasticService.updateDocument<
+        UpdateDocumentRequestBody<Partial<HubSource>>
+      >(
+        this.articlesConfigService.hubsElasticsearchIndex,
+        documentId,
+        updateRequestBody,
+      );
+
+    if (!isDocumentUpdated) {
+      return [false, 0];
+    }
+
+    const { result: updateHubDocumentResult, _version: hubDocumentVersion } =
+      updateResult;
+
+    if (updateHubDocumentResult === 'updated') {
+      return [true, hubDocumentVersion];
+    }
+
+    return [false, 0];
   }
 
   async setupIndex() {
@@ -182,6 +215,9 @@ export class HubsService implements OnModuleInit {
               hub_id: {
                 type: 'keyword',
               },
+              tag_id: {
+                type: 'keyword',
+              },
               name: {
                 type: 'text',
                 analyzer: 'autocomplete',
@@ -197,6 +233,12 @@ export class HubsService implements OnModuleInit {
               },
               tags_count: {
                 type: 'integer',
+              },
+              relation_type: {
+                type: 'join',
+                relations: {
+                  hub: 'tag',
+                },
               },
             },
           },

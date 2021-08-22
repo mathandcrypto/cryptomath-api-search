@@ -9,9 +9,10 @@ import { ArticlesConfigService } from './config.service';
     ConfigModule.forRoot({
       load: [configuration],
       validationSchema: Joi.object({
+        ARTICLES_SERVICE_PROTO_FILE: Joi.string().required(),
+        ARTICLES_SERVICE_PROTO_URL: Joi.string().required(),
         ARTICLES_ELASTICSEARCH_INDEX: Joi.string().required(),
         HUBS_ELASTICSEARCH_INDEX: Joi.string().required(),
-        TAGS_ELASTICSEARCH_INDEX: Joi.string().required(),
         ARTICLES_SEARCH_RESULTS_MAX_LIMIT: Joi.number().min(10).max(50),
         HUBS_SEARCH_RESULTS_MAX_LIMIT: Joi.number().min(10).max(50),
         TAGS_SEARCH_RESULTS_MAX_LIMIT: Joi.number().min(10).max(50),

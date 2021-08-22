@@ -2,8 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { RequestParams } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { CreateIndexResponse } from './interface/create-index-response.interface';
-import { IndexDocumentResponse } from './interface/index-document-response.interface';
+import { CreateIndexResponse } from './interface/response/create-index.interface';
+import { IndexDocumentResponse } from './interface/response/index-document.interface';
+import { UpdateDocumentResponse } from './interface/response/update-document.interface';
+import { IndexDocumentOptions } from './interface/request/index-document-options.interface';
 import {
   SearchRequest,
   SearchResponse,
@@ -15,16 +17,16 @@ export class ElasticService {
 
   constructor(private readonly elasticsearchService: ElasticsearchService) {}
 
-  async createIndex<T = any>(
+  async createIndex<T>(
     indexName: string,
     indexBody: T,
   ): Promise<[boolean, CreateIndexResponse]> {
-    try {
-      const request: RequestParams.IndicesCreate<T> = {
-        index: indexName,
-        body: indexBody,
-      };
+    const request: RequestParams.IndicesCreate<T> = {
+      index: indexName,
+      body: indexBody,
+    };
 
+    try {
       const response =
         await this.elasticsearchService.indices.create<CreateIndexResponse>(
           request,
@@ -43,7 +45,9 @@ export class ElasticService {
           this.logger.error(`Elasticsearch error: ${error.message}`);
         }
       } else {
-        this.logger.error(`Create index error: ${error.message}`);
+        this.logger.error(
+          `Create index error. Index name: ${indexName}. Error message: ${error.message}`,
+        );
       }
 
       return [false, null];
@@ -54,12 +58,12 @@ export class ElasticService {
     indexName: string,
     searchBody: T,
   ): Promise<[boolean, number, SearchResponse<R>]> {
-    try {
-      const request: RequestParams.Search<SearchRequest> = {
-        index: indexName,
-        body: searchBody,
-      };
+    const request: RequestParams.Search<SearchRequest> = {
+      index: indexName,
+      body: searchBody,
+    };
 
+    try {
       const response = await this.elasticsearchService.search<
         SearchResponse<R>
       >(request);
@@ -80,13 +84,15 @@ export class ElasticService {
   async indexDocument<T>(
     indexName: string,
     documentBody: T,
+    options?: IndexDocumentOptions,
   ): Promise<[boolean, IndexDocumentResponse]> {
-    try {
-      const request: RequestParams.Index<T> = {
-        index: indexName,
-        body: documentBody,
-      };
+    const request: RequestParams.Index<T> = {
+      index: indexName,
+      body: documentBody,
+      ...options,
+    };
 
+    try {
       const response =
         await this.elasticsearchService.index<IndexDocumentResponse>(request);
 
@@ -94,7 +100,37 @@ export class ElasticService {
 
       return [true, body];
     } catch (error) {
-      this.logger.error(`Index document error: ${error.message}`);
+
+      this.logger.error(
+        `Index document error. Index name: ${indexName}. Error message: ${error}`,
+      );
+
+      return [false, null];
+    }
+  }
+
+  async updateDocument<T>(
+    indexName: string,
+    documentId: string,
+    updateBody: T,
+  ): Promise<[boolean, UpdateDocumentResponse]> {
+    const request: RequestParams.Update<T> = {
+      id: documentId,
+      index: indexName,
+      body: updateBody,
+    };
+
+    try {
+      const response =
+        await this.elasticsearchService.update<UpdateDocumentResponse>(request);
+
+      const { body } = response;
+
+      return [true, body];
+    } catch (error) {
+      this.logger.error(
+        `Update document error. Index name: ${indexName}. Document id: ${documentId}. Error message: ${error.message}`,
+      );
 
       return [false, null];
     }

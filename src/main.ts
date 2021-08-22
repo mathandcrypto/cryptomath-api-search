@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AppConfigService } from '@config/app/config.service';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { SEARCH_PACKAGE_NAME } from 'cryptomath-api-proto/types/search';
+import { SEARCH_PACKAGE_NAME } from '@cryptomath/cryptomath-api-proto/types/search';
 import { join } from 'path';
 
 async function bootstrap() {
@@ -19,7 +19,7 @@ async function bootstrap() {
       package: SEARCH_PACKAGE_NAME,
       protoPath: join(
         process.cwd(),
-        'node_modules/cryptomath-api-proto/proto/',
+        'node_modules/@cryptomath/cryptomath-api-proto/proto/',
         protoFile,
       ),
       url: protoUrl,
@@ -38,10 +38,9 @@ async function bootstrap() {
   });
 
   await app.init();
+  await app.startAllMicroservices();
 
-  app.startAllMicroservices(() => {
-    logger.log(`Search gRPC microservice is listening on ${protoUrl}`);
-    logger.log(`Search RabbitMQ microservice is listening on ${rmqUrl}`);
-  });
+  logger.log(`Search gRPC microservice is listening on ${protoUrl}`);
+  logger.log(`Search RabbitMQ microservice is listening on ${rmqUrl}`);
 }
 bootstrap();

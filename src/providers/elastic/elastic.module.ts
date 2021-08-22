@@ -12,8 +12,8 @@ import { ElasticService } from './elastic.service';
       useFactory: (elasticsearchConfigService: ElasticsearchConfigService) => {
         const {
           node,
-          authUsername,
-          authPassword,
+          username,
+          password,
           maxRetries,
           requestTimeout,
           pingTimeout,
@@ -22,8 +22,8 @@ import { ElasticService } from './elastic.service';
         return {
           node,
           auth: {
-            username: authUsername,
-            password: authPassword,
+            username,
+            password,
           },
           maxRetries,
           requestTimeout,

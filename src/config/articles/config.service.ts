@@ -5,6 +5,14 @@ import { ConfigService } from '@nestjs/config';
 export class ArticlesConfigService {
   constructor(private configService: ConfigService) {}
 
+  get protoFile(): string {
+    return this.configService.get<string>('articles.protoFile');
+  }
+
+  get protoUrl(): string {
+    return this.configService.get<string>('articles.protoUrl');
+  }
+
   get articlesElasticsearchIndex(): string {
     return this.configService.get<string>(
       'articles.articlesElasticsearchIndex',
@@ -13,10 +21,6 @@ export class ArticlesConfigService {
 
   get hubsElasticsearchIndex(): string {
     return this.configService.get<string>('articles.hubsElasticsearchIndex');
-  }
-
-  get tagsElasticsearchIndex(): string {
-    return this.configService.get<string>('articles.tagsElasticsearchIndex');
   }
 
   get articlesSearchResultsMaxLimit(): number {
@@ -31,7 +35,7 @@ export class ArticlesConfigService {
 
   get tagsSearchResultsMaxLimit(): number {
     return this.configService.get<number>(
-      'articles.tagsSearchResultsMaxLimit:',
+      'articles.tagsSearchResultsMaxLimit',
     );
   }
 }

@@ -1,11 +1,14 @@
-import { TermQuery, RangeQuery } from '@elastic/elasticsearch/api/types';
+import {
+  QueryDslTermQuery,
+  QueryDslRangeQuery,
+} from '@elastic/elasticsearch/api/types';
 import { TermTypeQuery } from '@common/interfaces/elastic/query/term-type-query.interface';
 
 export const getRangeQueryObject = (
-  equals: number | undefined,
-  min: number | undefined,
-  max: number | undefined,
-): TermTypeQuery<TermQuery> | TermTypeQuery<RangeQuery> => {
+  equals?: number,
+  min?: number,
+  max?: number,
+): TermTypeQuery<QueryDslTermQuery> | TermTypeQuery<QueryDslRangeQuery> => {
   if (equals) {
     return { type: 'term', query: { value: equals } };
   } else {

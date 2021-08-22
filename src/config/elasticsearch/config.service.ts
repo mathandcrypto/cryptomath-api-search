@@ -9,12 +9,12 @@ export class ElasticsearchConfigService {
     return this.configService.get<string>('elasticsearch.node');
   }
 
-  get authUsername(): string {
-    return this.configService.get<string>('elasticsearch.authUsername');
+  get username(): string {
+    return this.configService.get<string>('elasticsearch.username');
   }
 
-  get authPassword(): string {
-    return this.configService.get<string>('elasticsearch.authPassword');
+  get password(): string {
+    return this.configService.get<string>('elasticsearch.password');
   }
 
   get maxRetries(): number {
